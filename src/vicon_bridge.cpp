@@ -52,6 +52,8 @@
 #include <vicon_bridge/viconCalibrateSegment.h>
 #include <tf/transform_listener.h>
 
+#include <my_utils_ros.h>
+
 using std::min;
 using std::max;
 using std::string;
@@ -133,6 +135,7 @@ class SegmentPublisher
 {
 public:
   ros::Publisher pub;
+  ros::Publisher pose_pub;
   bool is_ready;
   tf::Transform calibration_pose;
   bool calibrated;
@@ -333,6 +336,8 @@ private:
     {
       spub.pub = nh.advertise<geometry_msgs::TransformStamped>(tracked_frame_suffix_ + "/" + subject_name + "/"
                                                                                                             + segment_name, 10);
+      spub.pose_pub = nh.advertise<geometry_msgs::Pose>("subject_pose", 10);
+
     }
     // try to get zero pose from parameter server
     string param_suffix(subject_name + "/" + segment_name + "/zero_pose/");
@@ -458,6 +463,7 @@ private:
 
   void process_subjects(const ros::Time& frame_time)
   {
+
     string tracked_frame, subject_name, segment_name;
     unsigned int n_subjects = msvcbridge::GetSubjectCount().SubjectCount;
     SegmentMap::iterator pub_it;
@@ -511,7 +517,9 @@ private:
                   if(publish_tf_)
                   {
                     tf::transformStampedTFToMsg(transforms.back(), *pose_msg);
+                    geometry_msgs::Pose sub_pose = my_utils_ros::geometryTransStampToPose(*pose_msg);
                     seg.pub.publish(pose_msg);
+                    seg.pose_pub.publish(sub_pose);
                   }
                 }
               }
@@ -655,8 +663,8 @@ private:
       catch (tf::TransformException ex)
       {
         ROS_ERROR("%s", ex.what());
-        //    		resp.success = false;
-        //    		return false; // TODO: should we really bail here, or just try again?
+        //        resp.success = false;
+        //        return false; // TODO: should we really bail here, or just try again?
       }
     }
 

@@ -53,6 +53,8 @@ endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
 find_library(VICON_SDK_LIBRARY ViconDataStreamSDK_CPP PATHS ${VICON_SDK_LINK_DIR})
 
 include_directories(src ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${VICON_SDK_INCLUDE_DIR})
+include_directories($ENV{MY_HEADER})
+include_directories(/usr/include/eigen3)
 
 add_library(msvc_bridge src/msvc_bridge.cpp)
 
