@@ -52,8 +52,6 @@
 #include <vicon_bridge/viconCalibrateSegment.h>
 #include <tf/transform_listener.h>
 
-#include <my_utils_ros.h>
-
 using std::min;
 using std::max;
 using std::string;
@@ -517,7 +515,11 @@ private:
                   if(publish_tf_)
                   {
                     tf::transformStampedTFToMsg(transforms.back(), *pose_msg);
-                    geometry_msgs::Pose sub_pose = my_utils_ros::geometryTransStampToPose(*pose_msg);
+                    geometry_msgs::Pose sub_pose;
+                    sub_pose.orientation = pose_msg->transform.rotation;
+                    sub_pose.position.x = pose_msg->transform.translation.x;
+                    sub_pose.position.y = pose_msg->transform.translation.y;
+                    sub_pose.position.z = pose_msg->transform.translation.z;
                     seg.pub.publish(pose_msg);
                     seg.pose_pub.publish(sub_pose);
                   }
